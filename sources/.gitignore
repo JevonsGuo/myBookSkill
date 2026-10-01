@@ -1,0 +1,11 @@
+# 忽略大文件、扫描件与有版权限制的源格式书籍
+*
+!.gitignore
+!README.md
+*.pdf
+*.epub
+*.mobi
+*.azw3
+*.djvu
+*.zip
+*.tar.gz

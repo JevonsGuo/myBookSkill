@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large / Copyrighted Book Sources
+sources/**/*.pdf
+sources/**/*.epub
+sources/**/*.mobi
+sources/**/*.azw3
+sources/**/*.zip
+sources/**/*.tar.gz
+
+# External cloned repositories in sources
+sources/google-eng-practices/

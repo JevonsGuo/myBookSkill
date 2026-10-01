@@ -23,6 +23,8 @@
 | **`owasp-business-logic-review`** | OWASP WSTG & 业务逻辑审查指南 | 聚焦业务逻辑漏洞：防数据篡改、状态机防跳步/逆向扭转、并发竞态（TOCTOU）、接口幂等性与 Decimal 金额精度 |
 | **`peer-code-review-secrets`** | SmartBear《同行代码审查的秘密》 | 200~400 行审查规模控制、60分钟防疲劳断崖、人机分工律、高发缺陷热点挖掘（资源泄漏、空指针、N+1查询） |
 | **`google-code-review-guide`** | Google Engineering Practices Guide | Google 级工程实践：可维护性审查、过度设计防御（YAGNI）、单测有效性、小颗粒度变更规范 |
+| **`refactoring-fowler`** | Martin Fowler《重构》（第2版） | 24种代码坏味道诊断、两顶帽子法则、圈复杂度降低、卫语句平铺、多态取代条件分支与小步微节奏安全重构 |
+| **`clean-architecture`** | Uncle Bob《架构整洁之道》 | 依赖单向朝内法则、同心圆四层分层、端口与适配器（六边形）、细节即插件（DB/Web解耦）、无环依赖与边界审查 |
 | **`show-me`** | 架构与可视化指南 | 自动生成 Mermaid 流程图、时序图、系统拓扑与高内聚前端可视化视图 |
 
 ---
@@ -46,6 +48,8 @@
 │   ├── owasp-business-logic-review/
 │   ├── peer-code-review-secrets/
 │   ├── google-code-review-guide/
+│   ├── refactoring-fowler/
+│   ├── clean-architecture/
 │   └── show-me/
 │
 ├── AGENTS.md                     # Book-to-Skill 工程化建设指南与实战 SOP

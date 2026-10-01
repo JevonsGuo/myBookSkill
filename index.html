@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>myBookSkill · 智能体技能虚拟书架 (Agent Skills Library)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-card-hover: rgba(31, 41, 55, 0.95);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --accent-rose: #f43f5e;
+      --shelf-wood: linear-gradient(180deg, #382415 0%, #23160c 60%, #150d07 100%);
+      --shelf-highlight: rgba(255, 200, 150, 0.15);
+      --shelf-shadow: rgba(0, 0, 0, 0.8);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-glow: 0 0 35px -5px rgba(99, 102, 241, 0.25);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Outfit', 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    /* Top Navigation Header */
+    header {
+      padding: 2.5rem 2rem 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .brand-group {
+      max-width: 680px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-pill svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 50%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* Stat Cards Banner */
+    .stat-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: rgba(17, 24, 39, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      min-width: 120px;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-num span {
+      font-size: 1rem;
+      color: var(--accent-indigo);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    /* Toolbar: Search, Filters, View Modes */
+    .toolbar-container {
+      max-width: 1400px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 2rem;
+    }
+
+    .toolbar-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem 1.25rem;
+      backdrop-filter: blur(16px);
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+      max-width: 380px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.2rem 0;
+      scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.4);
+      font-weight: 600;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.2rem;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.4rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: rgba(99, 102, 241, 0.25);
+      color: #fff;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    /* ========================================================
+       1. 3D BOOKSHELF VIEW
+       ======================================================== */
+    .bookshelf-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4.5rem;
+      padding: 1rem 0 3rem;
+    }
+
+    .shelf-tier {
+      position: relative;
+    }
+
+    .shelf-books {
+      display: flex;
+      align-items: flex-end;
+      gap: 2.25rem;
+      padding: 0 3rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      margin-bottom: -6px;
+      z-index: 2;
+      position: relative;
+    }
+
+    /* 3D Book Visual Object */
+    .book-item {
+      position: relative;
+      width: 175px;
+      height: 255px;
+      cursor: pointer;
+      perspective: 1000px;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .book-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 4px 10px 10px 4px;
+      transform-style: preserve-3d;
+      transform: perspective(800px) rotateY(-12deg) rotateX(2deg);
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+      box-shadow: 
+        -5px 5px 15px rgba(0, 0, 0, 0.6),
+        0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .book-item:hover .book-card {
+      transform: perspective(800px) rotateY(0deg) translateY(-22px) scale(1.05);
+      box-shadow: 
+        0 25px 45px rgba(0, 0, 0, 0.8),
+        var(--book-glow, 0 0 30px rgba(99, 102, 241, 0.4));
+    }
+
+    /* Spine / Edge Thickness simulation */
+    .book-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+      background: linear-gradient(90deg, 
+        rgba(0,0,0,0.5) 0%, 
+        rgba(255,255,255,0.2) 20%, 
+        rgba(0,0,0,0.2) 60%, 
+        rgba(0,0,0,0.6) 100%);
+      z-index: 10;
+      border-radius: 4px 0 0 4px;
+      pointer-events: none;
+    }
+
+    /* Top Page Edge (White page leaves effect) */
+    .book-card::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 5px;
+      right: 3px;
+      height: 4px;
+      background: linear-gradient(to right, #ddd, #fff, #bbb);
+      transform: skewX(-45deg);
+      transform-origin: top;
+      opacity: 0.7;
+      border-radius: 2px;
+    }
+
+    .book-cover {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px 10px 10px 4px;
+      padding: 1.25rem 1rem 1rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      background: var(--book-bg, linear-gradient(135deg, #1e293b, #0f172a));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .book-cover.has-real-cover {
+      background: #0b0f19;
+    }
+
+    .book-cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px 10px 10px 4px;
+      z-index: 1;
+    }
+
+    /* 真实封面上的智能对比度渐变遮罩（确保书名、作者与徽标清晰高对比） */
+    .book-cover.has-real-cover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg, 
+        rgba(10, 14, 23, 0.72) 0%, 
+        rgba(10, 14, 23, 0.28) 28%, 
+        rgba(10, 14, 23, 0.48) 55%, 
+        rgba(10, 14, 23, 0.94) 100%
+      );
+      z-index: 2;
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+
+    .book-item:hover .book-cover.has-real-cover::after {
+      background: linear-gradient(
+        180deg, 
+        rgba(10, 14, 23, 0.6) 0%, 
+        rgba(10, 14, 23, 0.18) 28%, 
+        rgba(10, 14, 23, 0.38) 55%, 
+        rgba(10, 14, 23, 0.88) 100%
+      );
+    }
+
+    .book-texture-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, 
+        rgba(255, 255, 255, 0.16) 0%, 
+        rgba(255, 255, 255, 0.03) 35%, 
+        transparent 60%, 
+        rgba(0, 0, 0, 0.35) 100%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* 封面信息层：分类、书名、作者、标识符 (永远保留显示) */
+    .book-info-overlay {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      width: 100%;
+      position: relative;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .book-info-overlay * {
+      pointer-events: auto;
+    }
+
+    .book-category-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      align-self: flex-start;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      margin-bottom: 0.5rem;
+    }
+
+    .book-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .book-author {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .book-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 0.55rem;
+      margin-top: auto;
+    }
+
+    .book-slug-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .book-action-hint {
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .book-item:hover .book-action-hint {
+      background: #ffffff;
+      color: #000;
+      transform: scale(1.1);
+    }
+
+    /* Shelf Beam Physics & Visuals */
+    .shelf-beam {
+      position: relative;
+      height: 24px;
+      background: var(--shelf-wood);
+      border-radius: 3px;
+      box-shadow: 
+        0 -2px 5px var(--shelf-highlight) inset,
+        0 12px 25px var(--shelf-shadow);
+      margin: 0 1rem;
+    }
+
+    .shelf-beam::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #5c3c24, #a06e46, #6b4429);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .shelf-brackets {
+      position: absolute;
+      top: 24px;
+      left: 6%;
+      right: 6%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bracket {
+      width: 14px;
+      height: 38px;
+      background: linear-gradient(180deg, #475569, #1e293b);
+      border-radius: 0 0 3px 3px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    }
+
+    /* ========================================================
+       2. GRID VIEW (Cards Layout)
+       ======================================================== */
+    .grid-container {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .skill-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      bottom: 0;
+      background: var(--card-accent, var(--accent-indigo));
+    }
+
+    .skill-card:hover {
+      border-color: var(--card-accent, var(--accent-indigo));
+      transform: translateY(-4px);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.6);
+      background: var(--bg-card-hover);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-cat-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--card-accent, var(--accent-indigo));
+      background: rgba(99, 102, 241, 0.1);
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .card-slug {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-author {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: #d1d5db;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+
+    .card-meta-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .meta-chip {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
+
+    .card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .skill-card:hover .card-btn {
+      background: var(--card-accent, var(--accent-indigo));
+      border-color: transparent;
+    }
+
+    /* ========================================================
+       3. INTERACTIVE MODAL / DETAIL DRAWER
+       ======================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 13, 0.82);
+      backdrop-filter: blur(18px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-dialog {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 960px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.9), 0 0 50px rgba(99, 102, 241, 0.15);
+      position: relative;
+      transform: translateY(30px) scale(0.96);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-backdrop.open .modal-dialog {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      transform: rotate(90deg);
+    }
+
+    .modal-header-hero {
+      padding: 2.5rem 2.5rem 2rem;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-book-preview {
+      width: 130px;
+      height: 190px;
+      border-radius: 4px 8px 8px 4px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+      position: relative;
+      padding: 1rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .modal-book-preview.has-real-cover {
+      padding: 0;
+      background: #000;
+    }
+
+    .modal-cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px 8px 8px 4px;
+      z-index: 1;
+    }
+
+    .modal-book-preview::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.4), rgba(255,255,255,0.2), rgba(0,0,0,0.5));
+      border-radius: 4px 0 0 4px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .modal-meta-info {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .modal-category {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-indigo);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-author {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-slug-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #a5b4fc;
+    }
+
+    /* Modal Body Content */
+    .modal-body {
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-indigo);
+    }
+
+    .overview-text {
+      color: #d1d5db;
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+
+    /* Feature Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .feature-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
+      transition: border-color 0.2s;
+    }
+
+    .feature-item:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .feature-item h4 {
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .feature-item p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* References & Checklist Badges */
+    .files-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+    }
+
+    .file-item-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .file-icon {
+      color: var(--accent-indigo);
+    }
+
+    .file-name {
+      font-family: var(--font-mono);
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .file-desc {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    .file-tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Installation & Distribution Block */
+    .install-box {
+      background: #090d16;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .install-option {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .install-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .install-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .install-scope-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+    }
+
+    .code-row {
+      display: flex;
+      align-items: center;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem 0.5rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #67e8f9;
+      position: relative;
+    }
+
+    .code-text {
+      flex: 1;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-right: 1rem;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-indigo);
+      border-color: transparent;
+    }
+
+    .copy-btn.copied {
+      background: var(--accent-emerald);
+      border-color: transparent;
+    }
+
+    /* Trigger & Prompt Block */
+    .trigger-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .trigger-tag {
+      font-size: 0.78rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      padding: 0.3rem 0.65rem;
+      border-radius: 9999px;
+    }
+
+    .prompt-box {
+      background: rgba(17, 24, 39, 0.7);
+      border-left: 3px solid var(--accent-indigo);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    /* Interactive Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(16, 185, 129, 0.95);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      .shelf-books { gap: 1.25rem; padding: 0 1rem; }
+      .book-item { width: 140px; height: 210px; }
+      .modal-dialog { max-height: 95vh; }
+      .modal-header-hero { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+      .modal-body { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="hero-container">
+      <div class="brand-group">
+        <div class="badge-pill">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          myBookSkill 智能体工程化体系
+        </div>
+        <h1>技术典籍与 Agent 技能虚拟书架</h1>
+        <p class="hero-desc">
+          将业界长篇技术书籍与工业规范，系统化提炼为“渐进式加载、行动准则大于背景故事、闭环质检门禁”的标准 Agent Skills。点击任意书本即可查看核心能力与分发使用方式。
+        </p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-books-count">7 <span>本</span></div>
+          <div class="stat-label">已沉淀经典</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-ref-count">28+ <span>个</span></div>
+          <div class="stat-label">深度决策切片</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-chk-count">7 <span>套</span></div>
+          <div class="stat-label">实战自查清单</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toolbar: Search & View Options -->
+  <div class="toolbar-container">
+    <div class="toolbar-bar">
+      <!-- Search Input -->
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索书名、作者、能力、触发词...">
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="filter-tabs" id="filterTabs">
+        <button class="tab-btn active" data-cat="all">全部 (7)</button>
+        <button class="tab-btn" data-cat="架构设计">架构设计</button>
+        <button class="tab-btn" data-cat="代码重构">代码重构</button>
+        <button class="tab-btn" data-cat="代码审查">代码审查</button>
+        <button class="tab-btn" data-cat="质量测试">质量测试</button>
+        <button class="tab-btn" data-cat="安全合规">安全合规</button>
+        <button class="tab-btn" data-cat="系统设计">系统设计</button>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewShelfBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18"></rect><rect x="14" y="3" width="7" height="18"></rect></svg>
+          3D 书架
+        </button>
+        <button class="view-btn" id="viewGridBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          卡片网格
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  <main>
+    <!-- View 1: 3D Bookshelf View -->
+    <div class="bookshelf-container" id="bookshelfView">
+      <div class="shelf-tier">
+        <div class="shelf-books" id="shelfBooks">
+          <!-- Dynamically Rendered Books -->
+        </div>
+        <div class="shelf-beam"></div>
+        <div class="shelf-brackets">
+          <div class="bracket"></div>
+          <div class="bracket"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 2: Cards Grid View -->
+    <div class="grid-container" id="cardGridView">
+      <!-- Dynamically Rendered Cards -->
+    </div>
+  </main>
+
+  <!-- Interactive Detail Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="关闭">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="modal-header-hero" id="modalHeader">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body" id="modalBody">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastMsg">命令已复制到剪贴板！</span>
+  </div>
+
+  <script>
+    // Database of the 7 Skills & Books
+    const SKILLS_DATA = [
+      {
+        id: "clean-architecture",
+        title: "架构整洁之道",
+        originalTitle: "Clean Architecture: A Craftsman's Guide",
+        author: "Robert C. Martin (Uncle Bob)",
+        category: "架构设计",
+        slug: "clean-architecture",
+        coverImage: "assets/covers/clean-architecture.jpg",
+        colorTheme: {
+          bg: "linear-gradient(145deg, #1e3a8a, #0f172a)",
+          accent: "#3b82f6",
+          glow: "0 0 30px rgba(59, 130, 246, 0.45)"
+        },
+        overview: "Uncle Bob 架构理论集大成之作。提出高层业务策略与实现细节绝对解耦的架构第一铁律：源码依赖方向必须永远指向高层策略（由外向内，内层对外部世界一无所知）。将数据库、Web 框架、UI 彻底定性为可替换的‘细节插件’。",
+        skillPowers: [
+          { title: "同心圆四层归属准则", desc: "实体层（纯POJO）、用例层（业务编排）、适配器层（转换器）、框架驱动层（外部机制）单向依赖，杜绝越界。" },
+          { title: "细节即插件法则", desc: "‘数据库是细节’、‘Web是细节’，支持纯内存秒级完成 100% 业务用例测试，支持延迟数据库与中间件选型。" },
+          { title: "跨边界数据严格隔离", desc: "通过 Input/Output Boundary 规范交互，使用扁平 RequestModel/ViewModel 传递，严禁将 Entity 裸传给外部世界。" },
+          { title: "组件耦合三大原则治理", desc: "提供 ADP 无环依赖破除决策树，SDP 稳定依赖与 SAP 稳定抽象度度量，防范胖 Controller 与伪分层。" }
+        ],
+        references: [
+          { name: "01-dependency-rule-and-layers.md", desc: "依赖关系原则与同心圆四层分层归属决策树", type: "核心架构" },
+          { name: "02-boundaries-and-data-crossing.md", desc: "架构边界、端口体系（Ports）与跨边界数据传输规约", type: "数据流转" },
+          { name: "03-policy-vs-details.md", desc: "高层策略与细节即插件法则、装配根（Composition Root）", type: "解耦治理" },
+          { name: "04-architectural-anti-patterns.md", desc: "伪分层穿透、胖控制器、ADP无环依赖破除决策树", type: "反模式防御" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "12项架构分层与边界审查落地清单（满分制打分与红线叫停）" }
+        ],
+        triggers: [
+          "整洁架构", "Clean Architecture", "Uncle Bob", "依赖倒置", "系统分层设计", "六边形架构", "端口与适配器", "边界隔离", "消除循环依赖"
+        ],
+        promptExample: "请基于 clean-architecture 技能，为‘用户账户与结算流水’模块设计符合同心圆规范的目录结构与端口接口，确保业务实体零框架注解并杜绝实体裸传。"
+      },
+      {
+        id: "refactoring-fowler",
+        title: "重构：改善既有代码",
+        originalTitle: "Refactoring: Improving Existing Code (2nd)",
+        author: "Martin Fowler",
+        category: "代码重构",
+        slug: "refactoring-fowler",
+        coverImage: "assets/covers/refactoring-fowler.jpg",
+        colorTheme: {
+          bg: "linear-gradient(145deg, #065f46, #064e3b 50%, #022c22)",
+          accent: "#10b981",
+          glow: "0 0 30px rgba(16, 185, 129, 0.45)"
+        },
+        overview: "软件重构领域的奠基经典。定义了‘在不改变外部可观察行为的前提下改善软件内部结构’的科学方法论。通过两顶帽子法则、测试防护网与小步微节奏，将沉重的遗留代码改造成健康、可理解、易维护的高质量工程资产。",
+        skillPowers: [
+          { title: "24 种经典坏味道速查矩阵", desc: "涵盖膨胀剂（长函数/大类/数据泥团）、变革阻碍者（发散式变化/散弹修改）、耦合破坏者（依恋情结）的精准诊断。" },
+          { title: "两顶帽子纪律与提交隔离", desc: "严禁在一次提交中同时戴‘添加新功能’与‘重构’两顶帽子，确保 Git 历史清晰且支持 10 秒安全回滚。" },
+          { title: "降解圈复杂度与嵌套平铺", desc: "推行卫语句（Guard Clauses）提前退出、声明式管道（Pipelines）取代命令式循环状态、多态/策略取代重复 switch。" },
+          { title: "伪重构与大爆炸风险叫停", desc: "设立三大安全红线，提供重构紧急叫停决策树与公共 API 过时废弃（Deprecate & Delegate）平滑过渡策略。" }
+        ],
+        references: [
+          { name: "01-principles-and-rhythm.md", desc: "重构哲学、两顶帽子法则、微节奏控制与重构vs重写决策", type: "心智节奏" },
+          { name: "02-code-smells-catalog.md", desc: "24 种经典代码坏味道诊断、症状识别与对应手法速查矩阵", type: "坏味道矩阵" },
+          { name: "03-core-refactorings.md", desc: "高频核心重构手法：提炼函数、卫语句、管道流、多态策略替换", type: "核心手法" },
+          { name: "04-refactoring-anti-patterns.md", desc: "伪重构红线、紧急叫停决策树、大爆炸重构防御与API向后兼容", type: "红线防御" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "12项代码坏味道扫描与安全重构落地清单（含违背风险分析）" }
+        ],
+        triggers: [
+          "代码重构", "重构既有代码", "消除代码坏味道", "Code Smells", "提炼函数", "降低圈复杂度", "卫语句优化", "消除重复代码", "Martin Fowler"
+        ],
+        promptExample: "请基于 refactoring-fowler 技能，扫描这段既有代码中的坏味道，使用卫语句与提炼函数降解嵌套复杂度，并保持接口完全兼容。"
+      },
+      {
+        id: "google-code-review-guide",
+        title: "Google 代码审查指南",
+        originalTitle: "Google Engineering Practices: Code Review",
+        author: "Google Engineering Team",
+        category: "代码审查",
+        slug: "google-code-review-guide",
+        coverImage: null,
+        colorTheme: {
+          bg: "linear-gradient(145deg, #1e3a8a, #172554 60%, #080d1a)",
+          accent: "#60a5fa",
+          glow: "0 0 30px rgba(96, 165, 250, 0.45)"
+        },
+        overview: "源自 Google 官方工程实践（Google Engineering Practices）。将硅谷顶尖科技公司的工程审查标准转化为 Agent 行动指南，专注于持续净增系统健康度、事实胜于个人审美、防御过度设计与捍卫小颗粒度高质量交付。",
+        skillPowers: [
+          { title: "系统健康度净增仲裁原则", desc: "“只要本次变更明确净增了系统健康度即应批准”，不追求虚幻的绝对完美而阻碍团队快速迭代。" },
+          { title: "事实胜于个人主观审美", desc: "技术事实、基准数据与官方 Style Guide 具有绝对权威，同等合理时尊重作者选择。" },
+          { title: "过度设计防御 (YAGNI)", desc: "严防投机性通用抽象与虚假扩展性，剔除“未来可能有用”的臃肿胶水层。" },
+          { title: "严拒‘稍后清理’陷阱", desc: "防范‘稍后重构’变成‘永远不重构’，要求生产代码同包测试、杜绝虚假 Mock 覆盖。" }
+        ],
+        references: [
+          { name: "01-standard-and-mindset.md", desc: "Code Health 净增原则、评审者责任、事实与偏好权衡决策树", type: "仲裁心智" },
+          { name: "02-functionality-and-design.md", desc: "功能正确性决策树、快乐路径反模式、前后端校验脱节排查", type: "功能闭环" },
+          { name: "03-complexity-and-overengineering.md", desc: "YAGNI 原则、投机性抽象识别、注释解释 Why 而非 What", type: "复杂度控制" },
+          { name: "04-testing-and-code-health.md", desc: "生产代码同包测试底线、真实断言防伪、过度 Mock 坏味道", type: "测试质量" },
+          { name: "05-pr-hygiene-and-pushback.md", desc: "小变更拆分网格（水平/垂直）、评论标签分级（Nit/Blocker）", type: "PR卫生" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "Google 代码审查与业务验证打分清单（覆盖前后端与业务健壮性）" }
+        ],
+        triggers: [
+          "代码审查", "Code Review", "代码扫描", "审查业务逻辑", "检查代码坏味道", "PR审查", "Google规范", "过度设计审查"
+        ],
+        promptExample: "请基于 google-code-review-guide 技能，对本次 PR 提交进行全方位审查，重点审查设计合理性、YAGNI 过度工程防御与测试真实有效性。"
+      },
+      {
+        id: "peer-code-review-secrets",
+        title: "同行代码审查的秘密",
+        originalTitle: "Best Kept Secrets of Peer Code Review",
+        author: "SmartBear Software / Jason Cohen",
+        category: "代码审查",
+        slug: "peer-code-review-secrets",
+        coverImage: "assets/covers/peer-code-review-secrets.jpg",
+        colorTheme: {
+          bg: "linear-gradient(145deg, #4c1d95, #2e1065 60%, #17082e)",
+          accent: "#a78bfa",
+          glow: "0 0 30px rgba(167, 139, 250, 0.45)"
+        },
+        overview: "基于 SmartBear 对 Cisco 研发团队 2500 次真实代码审查、320 万行代码的大数据实证研究。揭示了代码审查规模控制、防疲劳断崖、人机分工律与高发缺陷清单挖掘的客观工程规律。",
+        skillPowers: [
+          { title: "200-400 行规模黄金律", desc: "单次审查严格限制在 200~400 行以内，速度控制在 300~500 LOC/h。超 400 行或 60 分钟检出率断崖下跌。" },
+          { title: "人机分工铁律", desc: "机器与 CI 负责缩进、格式与 Linter；人类与 Agent 审查者 100% 脑力聚焦于业务逻辑、边界与架构。" },
+          { title: "自我效应与作者导读", desc: "利用‘代码将被审查’的心理预期激发作者自审，推行作者主动提交 Diff 导读批注。" },
+          { title: "高发缺陷分类清单挖掘", desc: "利用清单使缺陷检出率翻倍，深度挖掘空指针、资源释放泄漏与 ORM N+1 数据库隐患。" }
+        ],
+        references: [
+          { name: "01-empirical-limits-and-pacing.md", desc: "Cisco 实证数据、200-400 行规模界限、60 分钟疲劳断崖", type: "实证规律" },
+          { name: "02-ego-effect-and-review-culture.md", desc: "自我效应心理学、作者主动导读（Guided Tour）与无责文化", type: "文化与自净" },
+          { name: "03-lightweight-methods-and-automation.md", desc: "5 大同行审查形态选型决策树、人肉 Linter 坏味道拦截", type: "人机分工" },
+          { name: "04-checklist-power-and-defect-mining.md", desc: "清单翻倍效应、高发缺陷 6 大黄金分类、Living Checklist", type: "缺陷挖掘" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "同行代码审查实战核对清单（防疲劳、作者自查、人机分工门禁）" }
+        ],
+        triggers: [
+          "同行审查", "Peer Review", "审查规模", "审查效率", "代码走查规范", "检查清单", "SmartBear", "Cisco实证"
+        ],
+        promptExample: "请基于 peer-code-review-secrets 技能，对该 PR 进行同行审查，优先排查高发缺陷（空指针、资源释放、N+1查询）并评估审查规模是否合规。"
+      },
+      {
+        id: "owasp-business-logic-review",
+        title: "OWASP 业务逻辑审查",
+        originalTitle: "OWASP WSTG - Business Logic Testing",
+        author: "OWASP Foundation",
+        category: "安全合规",
+        slug: "owasp-business-logic-review",
+        coverImage: null,
+        colorTheme: {
+          bg: "linear-gradient(145deg, #78350f, #451a03 60%, #1a0800)",
+          accent: "#f59e0b",
+          glow: "0 0 30px rgba(245, 158, 11, 0.45)"
+        },
+        overview: "聚焦传统 WAF 防火墙与静态扫描完全无法防范的应用层‘业务逻辑漏洞’。针对金融交易、账户权限、工作流流转与并发时差，建立严密的反作弊、防越权、防篡改闭环防线。",
+        skillPowers: [
+          { title: "参数篡改与极值防御", desc: "防御负数金额、0元购、越权修改他人资料（BOLA/IDOR）、浮点金额精度丢失。" },
+          { title: "状态机防跳步与逆转", desc: "防御工作流逆向扭转、跳过审批步骤直接打款、利用状态时延非法重复兑换。" },
+          { title: "并发竞态 (TOCTOU) 防御", desc: "识别检查与使用时差漏洞，利用数据库行锁、Redis 分布式锁防御并发薅羊毛与库存超卖。" },
+          { title: "严格接口幂等性保障", desc: "强制全局唯一流水号、防重放攻击与分布式事务资损补偿设计。" }
+        ],
+        references: [
+          { name: "01-business-logic-threat-model.md", desc: "业务逻辑威胁建模与非功能性安全决策树", type: "威胁建模" },
+          { name: "02-data-tampering-and-params.md", desc: "数据篡改防御：负数金额、越权参数、精度溢出排查", type: "参数完整性" },
+          { name: "03-state-machine-and-workflow.md", desc: "状态机防跳步与逆向扭转：订单、审批流完整性校验", type: "状态机闭环" },
+          { name: "04-concurrency-and-race-conditions.md", desc: "并发竞态与 TOCTOU 漏洞挖掘：行级排他锁、分布式锁实战", type: "并发防御" },
+          { name: "05-idempotency-and-precision.md", desc: "接口幂等性、全局防重令牌与 Decimal 高精度算术", type: "资损防线" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "业务逻辑安全审查自检清单（状态机、并发时序、资损防范）" }
+        ],
+        triggers: [
+          "业务逻辑漏洞", "OWASP", "安全审查", "并发竞态", "TOCTOU", "接口幂等性", "状态机跳步", "越权审查", "金融防资损"
+        ],
+        promptExample: "请基于 owasp-business-logic-review 技能，深度审查此支付与核销接口的业务逻辑安全，排查负数金额、状态机逆转与并发超卖漏洞。"
+      },
+      {
+        id: "test-case-generation",
+        title: "工业级测试脑用例工程",
+        originalTitle: "Industrial Test Case Engineering Mindset",
+        author: "工业级测试架构体系",
+        category: "质量测试",
+        slug: "test-case-generation",
+        coverImage: null,
+        colorTheme: {
+          bg: "linear-gradient(145deg, #155e75, #083344 60%, #031822)",
+          accent: "#06b6d4",
+          glow: "0 0 30px rgba(6, 182, 212, 0.45)"
+        },
+        overview: "将资深测试工程师的‘测试脑’（极端边界直觉、历史踩坑记忆、逆向异常推导与严格验收门禁）固化为标准技能。彻底根除 AI 仅输出浅层‘正常流（Happy Path）’的通病。",
+        skillPowers: [
+          { title: "强制 10 步推导流水线", desc: "需求拆解 → 风险评估 → 规则匹配 → 边界值计算 → 异常注入 → 历史缺陷回归 → 标准表格，严禁跳步。" },
+          { title: "拒绝 Happy Path 偏见", desc: "正常流仅占 20~30%，强制覆盖极端边界值（0、空字符、最大整数）、网络抖动、超时重试。" },
+          { title: "历史缺陷踩坑记忆驱动", desc: "建立生产踩坑事故库映射，强制针对并发时差、幂等重放、浮点截断生成对应回归用例。" },
+          { title: "100 分制打分自检门禁", desc: "缺乏边界值、缺少异常流硬性扣分，严格要求用例自检得分 ≥85 分方可交付。" }
+        ],
+        references: [
+          { name: "01-system-core-principles.md", desc: "测试脑基准原则、6 大覆盖维度与 P0/P1/P2 风险判定标准", type: "核心原则" },
+          { name: "02-workflows-10steps.md", desc: "10 步标准化用例生成流水线执行手册（推导过程规范）", type: "流水线" },
+          { name: "03-scoring-and-self-review.md", desc: "100 分制质量自评标准、硬性扣分红线与交付达标判定", type: "打分门禁" },
+          { name: "04-outputs-specification.md", desc: "工业级标准用例输出模板（对齐用例管理平台表格）", type: "输出标准" }
+        ],
+        checklists: [
+          { name: "review-checklist.md", desc: "测试用例交付质量验收清单（覆盖率、极端边界、异常流）" }
+        ],
+        triggers: [
+          "生成测试用例", "写测试用例", "用例设计", "测试方案", "边界值测试", "编写用例", "功能测试用例", "Test Case Generation"
+        ],
+        promptExample: "请基于 test-case-generation 技能，为‘人工付款单审核与批量核销’功能设计完整的工业级测试用例，覆盖边界值、并发竞态与异常流。"
+      },
+      {
+        id: "show-me",
+        title: "系统设计与架构可视化",
+        originalTitle: "Architecture & Code Flow Visualization",
+        author: "系统设计工程实践",
+        category: "系统设计",
+        slug: "show-me",
+        coverImage: null,
+        colorTheme: {
+          bg: "linear-gradient(145deg, #831843, #500724 60%, #1f020c)",
+          accent: "#ec4899",
+          glow: "0 0 30px rgba(236, 72, 153, 0.45)"
+        },
+        overview: "帮助开发者与架构师以直观、高内聚的图表透视复杂业务系统。跳过多余的口水文，用最小而精确的视图表达系统架构、调用层次、状态机扭转与领域模型边界。",
+        skillPowers: [
+          { title: "Mermaid 全图表生成", desc: "熟练输出流程图（Flowchart）、时序交互图（Sequence）、状态机图（State）、类图与架构拓扑。" },
+          { title: "代码形状速写 (Code-Shape)", desc: "通过伪代码骨架、调用树（Call Tree）与浅层目录树，快速理清复杂系统职责边界。" },
+          { title: "极简表达直击要害", desc: "挑选最能讲透关键论点的紧凑视角，避免图表过载导致注意力分散。" }
+        ],
+        references: [
+          { name: "SKILL.md", desc: "完整可视化指南：时序图、状态图、调用树与伪代码速写范式", type: "全能指南" }
+        ],
+        checklists: [],
+        triggers: [
+          "show me", "可视化", "画个架构图", "绘制时序图", "流程图", "状态机图", "调用关系图", "Mermaid", "系统拓扑"
+        ],
+        promptExample: "请基于 show-me 技能，绘制该订单状态流转与退款补偿事务的 Mermaid 状态图和时序图。"
+      }
+    ];
+
+    // State
+    let currentCategory = 'all';
+    let currentSearchQuery = '';
+    let currentView = 'shelf'; // 'shelf' | 'grid'
+
+    // DOM Elements
+    const shelfBooksContainer = document.getElementById('shelfBooks');
+    const cardGridContainer = document.getElementById('cardGridView');
+    const bookshelfView = document.getElementById('bookshelfView');
+    const searchInput = document.getElementById('searchInput');
+    const filterTabsContainer = document.getElementById('filterTabs');
+    const viewShelfBtn = document.getElementById('viewShelfBtn');
+    const viewGridBtn = document.getElementById('viewGridBtn');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalHeader = document.getElementById('modalHeader');
+    const modalBody = document.getElementById('modalBody');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+
+    // Filter Logic
+    function getFilteredSkills() {
+      return SKILLS_DATA.filter(item => {
+        const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+        const q = currentSearchQuery.toLowerCase().trim();
+        const matchesSearch = !q || (
+          item.title.toLowerCase().includes(q) ||
+          item.author.toLowerCase().includes(q) ||
+          item.slug.toLowerCase().includes(q) ||
+          item.overview.toLowerCase().includes(q) ||
+          item.triggers.some(t => t.toLowerCase().includes(q))
+        );
+        return matchesCategory && matchesSearch;
+      });
+    }
+
+    // Render Bookshelf View
+    function renderBookshelf() {
+      const items = getFilteredSkills();
+      shelfBooksContainer.innerHTML = '';
+
+      if (items.length === 0) {
+        shelfBooksContainer.innerHTML = `
+          <div style="padding: 3rem; text-align: center; width: 100%; color: var(--text-dim);">
+            未找到匹配的书籍或技能，请调整搜索关键词或分类。
+          </div>
+        `;
+        return;
+      }
+
+      items.forEach(book => {
+        const bookEl = document.createElement('div');
+        bookEl.className = 'book-item';
+        bookEl.style.setProperty('--book-bg', book.colorTheme.bg);
+        bookEl.style.setProperty('--book-glow', book.colorTheme.glow);
+
+        const hasRealCover = !!book.coverImage;
+        const coverHtml = `
+          <div class="book-cover ${hasRealCover ? 'has-real-cover' : ''}">
+            ${hasRealCover ? `<img class="book-cover-img" src="${book.coverImage}" alt="${book.title}" loading="lazy" onerror="this.remove(); this.parentElement.classList.remove('has-real-cover');">` : ''}
+            <div class="book-texture-overlay"></div>
+            <div class="book-info-overlay">
+              <div>
+                <span class="book-category-tag">${book.category}</span>
+                <h3 class="book-title">${book.title}</h3>
+                <p class="book-author">${book.author}</p>
+              </div>
+              <div class="book-footer">
+                <span class="book-slug-badge">${book.slug}</span>
+                <div class="book-action-hint">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        bookEl.innerHTML = `
+          <div class="book-card">
+            ${coverHtml}
+          </div>
+        `;
+
+        bookEl.addEventListener('click', () => openModal(book));
+        shelfBooksContainer.appendChild(bookEl);
+      });
+    }
+
+    // Render Card Grid View
+    function renderGrid() {
+      const items = getFilteredSkills();
+      cardGridContainer.innerHTML = '';
+
+      if (items.length === 0) {
+        cardGridContainer.innerHTML = `
+          <div style="padding: 3rem; text-align: center; grid-column: 1 / -1; color: var(--text-dim);">
+            未找到匹配的书籍或技能。
+          </div>
+        `;
+        return;
+      }
+
+      items.forEach(book => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'skill-card';
+        cardEl.style.setProperty('--card-accent', book.colorTheme.accent);
+
+        const coverThumb = book.coverImage ? `
+          <img src="${book.coverImage}" alt="${book.title}" style="width:56px; height:80px; object-fit:cover; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.5); flex-shrink:0; border:1px solid rgba(255,255,255,0.15);" onerror="this.remove();">
+        ` : '';
+
+        cardEl.innerHTML = `
+          <div class="card-top" style="display:flex; gap:1rem; align-items:flex-start;">
+            ${coverThumb}
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                <span class="card-cat-badge">${book.category}</span>
+                <span class="card-slug">${book.slug}</span>
+              </div>
+              <h3 class="card-title">${book.title}</h3>
+              <p class="card-author">${book.author}</p>
+            </div>
+          </div>
+          <p class="card-desc">${book.overview}</p>
+          <div class="card-meta-chips">
+            <span class="meta-chip">📚 ${book.references.length} 个核心切片</span>
+            <span class="meta-chip">✅ ${book.checklists.length} 份质检清单</span>
+            <span class="meta-chip">⚡ ${book.triggers.length} 个触发词</span>
+          </div>
+          <button class="card-btn">
+            <span>查看技能详情与安装指令</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        `;
+
+        cardEl.addEventListener('click', () => openModal(book));
+        cardGridContainer.appendChild(cardEl);
+      });
+    }
+
+    function renderActiveView() {
+      if (currentView === 'shelf') {
+        bookshelfView.style.display = 'block';
+        cardGridContainer.style.display = 'none';
+        renderBookshelf();
+      } else {
+        bookshelfView.style.display = 'none';
+        cardGridContainer.style.display = 'grid';
+        renderGrid();
+      }
+    }
+
+    // Modal Details Logic
+    function openModal(book) {
+      // Header
+      const modalCoverHtml = book.coverImage ? `
+        <div class="modal-book-preview has-real-cover">
+          <img class="modal-cover-img" src="${book.coverImage}" alt="${book.title}" onerror="this.remove(); this.parentElement.classList.remove('has-real-cover');">
+          <div class="book-texture-overlay"></div>
+        </div>
+      ` : `
+        <div class="modal-book-preview" style="background: ${book.colorTheme.bg};">
+          <span style="font-size:0.6rem; opacity:0.8; font-weight:700;">myBookSkill 典籍</span>
+          <div>
+            <h4 style="font-size:0.95rem; font-weight:800; line-height:1.2; margin-bottom:0.2rem;">${book.title}</h4>
+            <p style="font-size:0.65rem; opacity:0.7;">${book.author}</p>
+          </div>
+          <span style="font-family:var(--font-mono); font-size:0.6rem; background:rgba(0,0,0,0.4); padding:2px 4px; border-radius:3px;">${book.slug}</span>
+        </div>
+      `;
+
+      modalHeader.innerHTML = `
+        ${modalCoverHtml}
+        <div class="modal-meta-info">
+          <div class="modal-category">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"></circle></svg>
+            ${book.category} 经典工程沉淀
+          </div>
+          <h2 class="modal-title">${book.title}</h2>
+          <p class="modal-author">${book.originalTitle} · 原著：<strong>${book.author}</strong></p>
+          <div class="modal-slug-box">
+            <span>技能标识符 (Slug):</span>
+            <strong>${book.slug}</strong>
+          </div>
+        </div>
+      `;
+
+      // Body Sections
+      const globalCmd = `python3 pipeline/scripts/distribute.py --skill ${book.slug} --target global`;
+      const projectCmd = `python3 pipeline/scripts/distribute.py --skill ${book.slug} --target /path/to/your-project`;
+
+      modalBody.innerHTML = `
+        <!-- Section 1: Overview -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            原书精粹与心智模型 (Mental Models)
+          </div>
+          <p class="overview-text">${book.overview}</p>
+        </div>
+
+        <!-- Section 2: What Skill Does -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            转化为 Skill 后的实战硬核能力
+          </div>
+          <div class="feature-grid">
+            ${book.skillPowers.map(p => `
+              <div class="feature-item">
+                <h4>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  ${p.title}
+                </h4>
+                <p>${p.desc}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Section 3: References & Checklists -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            模块化切片与实战清单 (References & Checklists)
+          </div>
+          <div class="files-list">
+            ${book.references.map(ref => `
+              <div class="file-item">
+                <div class="file-item-left">
+                  <span class="file-icon">📄</span>
+                  <span class="file-name">${ref.name}</span>
+                  <span class="file-desc">${ref.desc}</span>
+                </div>
+                <span class="file-tag">${ref.type}</span>
+              </div>
+            `).join('')}
+            ${book.checklists.map(chk => `
+              <div class="file-item">
+                <div class="file-item-left">
+                  <span class="file-icon">📋</span>
+                  <span class="file-name">checklists/${chk.name}</span>
+                  <span class="file-desc">${chk.desc}</span>
+                </div>
+                <span class="file-tag" style="background:rgba(99,102,241,0.15); color:#a5b4fc; border-color:rgba(99,102,241,0.3);">落地审查</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Section 4: Distribution / How to use -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            跨项目使用与安装分发 (Distribution)
+          </div>
+          <div class="install-box">
+            <!-- Global Install -->
+            <div class="install-option">
+              <div class="install-header">
+                <span class="install-title">方式一：安装为全局技能（所有项目和 Agent 对话全局可用）</span>
+                <span class="install-scope-badge">~/.gemini/config/skills/</span>
+              </div>
+              <div class="code-row">
+                <span class="code-text" id="cmdGlobal">${globalCmd}</span>
+                <button class="copy-btn" onclick="copyText('${globalCmd}', this)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  复制指令
+                </button>
+              </div>
+            </div>
+
+            <!-- Project Install -->
+            <div class="install-option">
+              <div class="install-header">
+                <span class="install-title">方式二：分发到具体业务工程（项目独占，提交至项目 Git 库）</span>
+                <span class="install-scope-badge">&lt;project-root&gt;/.agents/skills/</span>
+              </div>
+              <div class="code-row">
+                <span class="code-text" id="cmdProject">${projectCmd}</span>
+                <button class="copy-btn" onclick="copyText('${projectCmd}', this)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  复制指令
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Trigger Keywords & Prompt Example -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            触发关键词与推荐提示词 (Prompts)
+          </div>
+          <div class="trigger-tags">
+            ${book.triggers.map(t => `<span class="trigger-tag">${t}</span>`).join('')}
+          </div>
+          <div class="prompt-box">
+            <div style="flex:1;">
+              <span style="font-size:0.75rem; color:#818cf8; text-transform:uppercase; font-weight:700; display:block; margin-bottom:0.25rem;">推荐实战 Prompt 模版：</span>
+              <span>“${book.promptExample}”</span>
+            </div>
+            <button class="copy-btn" onclick="copyText('${book.promptExample}', this)" style="align-self:center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              复制 Prompt
+            </button>
+          </div>
+        </div>
+      `;
+
+      modalBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Copy to Clipboard
+    function copyText(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已复制到剪贴板！');
+        if (btnElement) {
+          const originalText = btnElement.innerHTML;
+          btnElement.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            已复制
+          `;
+          btnElement.classList.add('copied');
+          setTimeout(() => {
+            btnElement.innerHTML = originalText;
+            btnElement.classList.remove('copied');
+          }, 2000);
+        }
+      }).catch(err => {
+        console.error('复制失败:', err);
+        showToast('复制失败，请手动选择复制');
+      });
+    }
+
+    function showToast(msg) {
+      toastMsg.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Event Listeners
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // View Switchers
+    viewShelfBtn.addEventListener('click', () => {
+      currentView = 'shelf';
+      viewShelfBtn.classList.add('active');
+      viewGridBtn.classList.remove('active');
+      renderActiveView();
+    });
+
+    viewGridBtn.addEventListener('click', () => {
+      currentView = 'grid';
+      viewGridBtn.classList.add('active');
+      viewShelfBtn.classList.remove('active');
+      renderActiveView();
+    });
+
+    // Search Input
+    searchInput.addEventListener('input', (e) => {
+      currentSearchQuery = e.target.value;
+      renderActiveView();
+    });
+
+    // Filter Tabs
+    filterTabsContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-btn')) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentCategory = e.target.dataset.cat;
+        renderActiveView();
+      }
+    });
+
+    // Initial Render
+    renderActiveView();
+  </script>
+</body>
+</html>
